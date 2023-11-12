@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using seaside.api.Data;
 
@@ -11,9 +12,11 @@ using seaside.api.Data;
 namespace seaside.api.Migrations
 {
     [DbContext(typeof(SeasideContext))]
-    partial class SeasideContextModelSnapshot : ModelSnapshot
+    [Migration("20231112195118_AddCreatedByToTodos")]
+    partial class AddCreatedByToTodos
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

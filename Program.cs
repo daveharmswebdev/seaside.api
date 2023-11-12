@@ -1,4 +1,6 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Identity.Web;
 using seaside.api.Configurations;
 using seaside.api.Contracts;
 using seaside.api.Data;
@@ -14,6 +16,14 @@ builder.Services.AddDbContext<SeasideContext>(options =>
 {
     options.UseSqlServer(connectionString);
 });
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddMicrosoftIdentityWebApi(options =>
+        {
+            builder.Configuration.Bind("AzureAdB2C", options);
+            options.TokenValidationParameters.NameClaimType = "name";
+        },
+        options => { builder.Configuration.Bind("AzureAdB2C", options); });
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -44,11 +54,11 @@ if (app.Environment.IsDevelopment())
 app.UseSerilogRequestLogging();
 
 app.UseHttpsRedirection();
+app.UseAuthentication();
 
 app.UseCors("AllowAll");
 
 app.UseAuthorization();
-
 app.MapControllers();
 
 app.Run();
