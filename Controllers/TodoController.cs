@@ -28,15 +28,11 @@ namespace seaside.api.Controllers
         [RequiredScope("todos.read")]
         public async Task<ActionResult<List<TodoDto>>> GetTodos()
         {
-            if (_contextAccessor.HttpContext != null)
-            {
-                var name = _contextAccessor.HttpContext.User.Identity?.Name;
-                var email = _contextAccessor.HttpContext.User.Claims.FirstOrDefault(c => c.Type == "emails")?.Value;
-                var id = _contextAccessor.HttpContext.User.Claims.FirstOrDefault(c => c.Type == "http://schemas.microsoft.com/identity/claims/objectidentifier")?.Value;
-            }
+            var createdBy = User.Claims.FirstOrDefault(c => c.Type == "http://schemas.microsoft.com/identity/claims/objectidentifier")?.Value;
+
             
             var todos = await _todoRepository.GetAllAsync();
-            var todoDtos = _mapper.Map<List<TodoDto>>(todos);
+            var todoDtos = _mapper.Map<List<TodoDto>>(todos.Where(t => t.CreatedBy == createdBy));
 
             return Ok(todoDtos);
         }
@@ -50,10 +46,13 @@ namespace seaside.api.Controllers
         }
 
         [HttpPost]
+        [RequiredScope("todos.write")]
         public async Task<ActionResult<TodoDto>> CreateTodo([FromBody] CreateTodoDto createTodoDto)
         {
             var newTodo = _mapper.Map<Todo>(createTodoDto);
+            var createdBy = User.Claims.FirstOrDefault(c => c.Type == "http://schemas.microsoft.com/identity/claims/objectidentifier")?.Value;
             
+            newTodo.CreatedBy = createdBy;
             newTodo.CreatedAt = DateTime.Now;
             newTodo.ModifiedAt = DateTime.Now;
             var createdTodo = await _todoRepository.AddAsync(newTodo);
